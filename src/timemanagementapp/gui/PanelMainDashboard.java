@@ -6,9 +6,14 @@
 package timemanagementapp.gui;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.JOptionPane;
+import javax.swing.table.AbstractTableModel;
 import timemanagementapp.DAO.DAO;
+import timemanagementapp.model.TaskLog;
 
 /**
  *
@@ -138,4 +143,91 @@ public class PanelMainDashboard extends javax.swing.JPanel {
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTable jTable1;
     // End of variables declaration//GEN-END:variables
+}
+
+class TodayTasksTableModel extends AbstractTableModel {
+    private List<TaskLog> tasks;
+    private List<String[]> taskList;
+    private String[] colTitles = new String[] { "Description", "Type", "Time", "Notes" };
+    
+    private void fillTaskList() {
+        this.taskList = new ArrayList<String[]>();
+        for (Iterator it=this.tasks.iterator(); it.hasNext(); ) {
+            TaskLog task = (TaskLog) it.next();
+            taskList.add(new String[] {task.getTask(), task.getType().getType(), task.getHoursTime(), task.getNotes()});
+        }
+    }
+    
+    public TodayTasksTableModel(List<TaskLog> tasks) {
+        this.tasks = tasks;          
+        fillTaskList();
+    }
+    
+    public TodayTasksTableModel() {
+        this.tasks = new ArrayList<TaskLog>();        
+        fillTaskList();
+    }
+    
+    public int getRowCount() {
+        return tasks.size();
+    }
+  
+    public int getColumnCount() {
+        return colTitles.length;
+    }
+    
+    @Override
+    public String getColumnName(int columnIndex){
+      return colTitles[columnIndex];
+    }    
+     
+    @Override  
+    public Class<?> getColumnClass(int columnIndex) {  
+        return String.class;  
+    }
+    
+    public void setValueAt(TaskLog aValue, int rowIndex) {  
+        TaskLog task = tasks.get(rowIndex);
+        String[] taskItem = taskList.get(rowIndex);
+        
+        try {
+            task.setId(aValue.getId());
+            task.setDate(aValue.getDate());
+            task.setTask(aValue.getTask());
+            task.setTime(aValue.getTime());
+            task.setType(aValue.getType());
+            task.setNotes(aValue.getNotes());
+            
+            taskItem[0] = task.getTask();
+            taskItem[1] = task.getType().getType();
+            taskItem[2] = task.getHoursTime();
+            taskItem[3] = task.getNotes();
+
+            fireTableCellUpdated(rowIndex, 0);  
+            fireTableCellUpdated(rowIndex, 1);  
+            fireTableCellUpdated(rowIndex, 2);  
+            fireTableCellUpdated(rowIndex, 3);  
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "An error has occured:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }   
+    }
+    
+    @Override  
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {  
+        TaskLog task = tasks.get(rowIndex);
+   
+        switch (columnIndex) {
+            case 0:  
+                task.setLogin(aValue.toString());
+            case 1:  
+                usuario.setNome(aValue.toString());             
+            case 2:  
+                usuario.setSenha(aValue.toString());             
+
+            default:  
+                 System.err.println("Índice da coluna inválido");
+     }  
+     fireTableCellUpdated(rowIndex, columnIndex);  
+     }      
 }
