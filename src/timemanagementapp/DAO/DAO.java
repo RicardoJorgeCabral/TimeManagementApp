@@ -125,7 +125,10 @@ public class DAO {
         boolean exists = false;
         if (tLog.getId()>0) {
             TaskLog existing = this.getTaskLog(tLog.getId());
-            if (existing.getId()>0) exists = true; 
+            if (existing.getId()>0) {
+              exists = true;
+              id = existing.getId();
+            } 
         }
         if (exists)
             sql = "UPDATE TaskLog SET date=?,type=?,task=?,time=?,notes=? WHERE id=?";
@@ -142,11 +145,13 @@ public class DAO {
             pstmt.setInt(6, tLog.getId());
         }
         pstmt.executeUpdate();
-        sql = "SELECT last_insert_rowid()";
-        Statement stmt  = conn.createStatement();
-        ResultSet rs    = stmt.executeQuery(sql); 
-        if (rs.next()) {
-            id = rs.getInt(1);
+        if (!exists) {
+          sql = "SELECT last_insert_rowid()";
+          Statement stmt  = conn.createStatement();
+          ResultSet rs    = stmt.executeQuery(sql); 
+          if (rs.next()) {
+              id = rs.getInt(1);
+          }
         }
         conn.close();
         return id;
@@ -257,4 +262,14 @@ public class DAO {
         return res;
     }
     
+    public int getTotalHoursDate(Date date) throws Exception {        
+        int total = 0;
+        String sql = "SELECT SUM(time) FROM TaskLog WHERE date=?";
+        Connection conn = this.connect();
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, new SimpleDateFormat("yyyy-MM-dd").format(date));
+        ResultSet rs    = pstmt.executeQuery(sql);            
+        if (rs.next()) total = rs.getInt(1);
+        return total;
+    }
 }

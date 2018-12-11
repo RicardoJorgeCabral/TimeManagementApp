@@ -16,10 +16,23 @@ public class BaseJFrame extends javax.swing.JFrame {
      */
     public BaseJFrame() {
         initComponents();
+        showMainDashboard();
     }
     
-    public void cleanMainPanel() {
-        this.mainPanel.removeAll();
+    private void showMainDashboard() {
+      this.mainPanel.removeAll();
+      PanelMainDashboard p = new PanelMainDashboard();
+      this.mainPanel.add(p);
+      this.revalidate();
+    }         
+    
+    public void refreshMainPanel() {
+      cleanMainPanel();
+      showMainDashboard();
+    }
+    
+    private void cleanMainPanel() {
+        this.mainPanel.removeAll();        
         this.repaint();
         this.revalidate();    
     }

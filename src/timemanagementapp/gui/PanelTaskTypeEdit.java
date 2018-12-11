@@ -18,7 +18,7 @@ import timemanagementapp.model.TaskType;
 public class PanelTaskTypeEdit extends javax.swing.JPanel {
 
     private BaseJFrame mainFrame;
-    private DAO db = new DAO();
+    private final DAO db = new DAO();
     
     /**
      * Creates new form PanelTaskType
@@ -209,7 +209,7 @@ public class PanelTaskTypeEdit extends javax.swing.JPanel {
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
         // TODO add your handling code here:
         this.removeAll();
-        this.mainFrame.cleanMainPanel(); 
+        this.mainFrame.refreshMainPanel(); 
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
