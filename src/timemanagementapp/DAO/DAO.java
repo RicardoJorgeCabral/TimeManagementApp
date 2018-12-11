@@ -262,14 +262,16 @@ public class DAO {
         return res;
     }
     
-    public int getTotalHoursDate(Date date) throws Exception {        
+    public int getTotalTimeDate(Date date) throws Exception {        
         int total = 0;
         String sql = "SELECT SUM(time) FROM TaskLog WHERE date=?";
+        String datetxt = new SimpleDateFormat("yyyy-MM-dd").format(date);
         Connection conn = this.connect();
         PreparedStatement pstmt = conn.prepareStatement(sql);
-        pstmt.setString(1, new SimpleDateFormat("yyyy-MM-dd").format(date));
-        ResultSet rs    = pstmt.executeQuery(sql);            
+        pstmt.setString(1, datetxt);
+        ResultSet rs    = pstmt.executeQuery();            
         if (rs.next()) total = rs.getInt(1);
+        conn.close();
         return total;
     }
 }
