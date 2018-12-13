@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import javax.swing.table.AbstractTableModel;
 import timemanagementapp.DAO.DAO;
@@ -39,6 +41,28 @@ public class PanelMainDashboard extends javax.swing.JPanel {
         JOptionPane.showMessageDialog(null, "An error has occured:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
     }
   }
+  
+  private TodayTasksTableModel fillTodayTasks() {
+      TodayTasksTableModel model = new TodayTasksTableModel();
+      try {
+          Date now = new Date();
+          List<TaskLog> res = db.getTaskLogs(now, now);
+          List<String[]> data = new ArrayList<String[]>();
+          for (Iterator it=res.iterator(); it.hasNext(); ) {
+              TaskLog item = (TaskLog) it.next();
+              String[] itemLine = new String[4];
+              itemLine[0] = item.getTask();
+              itemLine[1] = item.getType().getType();
+              itemLine[2] = item.getHoursTime();
+              itemLine[3] = item.getNotes();                           
+              data.add(itemLine);
+          }
+          model = new TodayTasksTableModel(data);          
+      } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "An error has occured:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+      return model;
+  }
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -55,7 +79,7 @@ public class PanelMainDashboard extends javax.swing.JPanel {
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        jTable1 = new javax.swing.JTable();
+        jTableTodayTasks = new javax.swing.JTable();
         jLabel6 = new javax.swing.JLabel();
 
         jLabel1.setText("Date:");
@@ -73,18 +97,8 @@ public class PanelMainDashboard extends javax.swing.JPanel {
 
         jLabel5.setText("Times last 7 days:");
 
-        jTable1.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
-        jScrollPane1.setViewportView(jTable1);
+        jTableTodayTasks.setModel(fillTodayTasks());
+        jScrollPane1.setViewportView(jTableTodayTasks);
 
         jLabel6.setText("hours");
 
@@ -141,35 +155,24 @@ public class PanelMainDashboard extends javax.swing.JPanel {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTableTodayTasks;
     // End of variables declaration//GEN-END:variables
 }
 
-class TodayTasksTableModel extends AbstractTableModel {
-    private List<TaskLog> tasks;
+class TodayTasksTableModel extends AbstractTableModel {    
     private List<String[]> taskList;
     private String[] colTitles = new String[] { "Description", "Type", "Time", "Notes" };
-    
-    private void fillTaskList() {
-        this.taskList = new ArrayList<String[]>();
-        for (Iterator it=this.tasks.iterator(); it.hasNext(); ) {
-            TaskLog task = (TaskLog) it.next();
-            taskList.add(new String[] {task.getTask(), task.getType().getType(), task.getHoursTime(), task.getNotes()});
-        }
-    }
-    
-    public TodayTasksTableModel(List<TaskLog> tasks) {
-        this.tasks = tasks;          
-        fillTaskList();
+        
+    public TodayTasksTableModel(List<String[]> tasks) {
+        this.taskList = tasks;
     }
     
     public TodayTasksTableModel() {
-        this.tasks = new ArrayList<TaskLog>();        
-        fillTaskList();
+        this.taskList = new ArrayList<String[]>();
     }
     
     public int getRowCount() {
-        return tasks.size();
+        return taskList.size();
     }
   
     public int getColumnCount() {
@@ -186,23 +189,22 @@ class TodayTasksTableModel extends AbstractTableModel {
         return String.class;  
     }
     
-    public void setValueAt(TaskLog aValue, int rowIndex) {  
-        TaskLog task = tasks.get(rowIndex);
-        String[] taskItem = taskList.get(rowIndex);
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      String[] task = this.taskList.get(rowIndex);
+      return task[columnIndex];
+    }
+    
+    public void setValueAt(String[] aValue, int rowIndex) {  
+        String[] task = this.taskList.get(rowIndex);
         
-        try {
-            task.setId(aValue.getId());
-            task.setDate(aValue.getDate());
-            task.setTask(aValue.getTask());
-            task.setTime(aValue.getTime());
-            task.setType(aValue.getType());
-            task.setNotes(aValue.getNotes());
-            
-            taskItem[0] = task.getTask();
-            taskItem[1] = task.getType().getType();
-            taskItem[2] = task.getHoursTime();
-            taskItem[3] = task.getNotes();
+        try {            
+            task[0] = aValue[0];
+            task[1] = aValue[1];
+            task[2] = aValue[2];
+            task[3] = aValue[3];
 
+            this.taskList.set(rowIndex, task);
             fireTableCellUpdated(rowIndex, 0);  
             fireTableCellUpdated(rowIndex, 1);  
             fireTableCellUpdated(rowIndex, 2);  
@@ -215,19 +217,9 @@ class TodayTasksTableModel extends AbstractTableModel {
     
     @Override  
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {  
-        TaskLog task = tasks.get(rowIndex);
-   
-        switch (columnIndex) {
-            case 0:  
-                task.setLogin(aValue.toString());
-            case 1:  
-                usuario.setNome(aValue.toString());             
-            case 2:  
-                usuario.setSenha(aValue.toString());             
-
-            default:  
-                 System.err.println("Índice da coluna inválido");
-     }  
-     fireTableCellUpdated(rowIndex, columnIndex);  
+        String[] task = this.taskList.get(rowIndex);
+        task[columnIndex] = (String) aValue;
+        this.taskList.set(rowIndex, task);
+        fireTableCellUpdated(rowIndex, columnIndex);  
      }      
 }
