@@ -7,6 +7,7 @@ package timemanagementapp.gui;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -24,10 +25,13 @@ import timemanagementapp.model.TaskLog;
 public class PanelMainDashboard extends javax.swing.JPanel {
 
   private final DAO db = new DAO();
+  private BaseJFrame mainFrame;
+  private List<Integer> todayTaskIds;
   /**
    * Creates new form PanelMainDashboard
    */
-  public PanelMainDashboard() {
+  public PanelMainDashboard(BaseJFrame f) {
+    this.mainFrame = f;
     initComponents();
     Date now = new Date();
     jLabel2.setText(new SimpleDateFormat("yyyy-MM-dd").format(now));
@@ -42,13 +46,39 @@ public class PanelMainDashboard extends javax.swing.JPanel {
     }
   }
   
+  private TimesLast7DaysTableModel fillLast7Days() {
+      TimesLast7DaysTableModel model = new TimesLast7DaysTableModel();
+      try {
+          List<String[]> data = new ArrayList<String[]>();
+          Calendar cal = Calendar.getInstance();          
+          cal.setTime(new Date());
+          cal.set(Calendar.DAY_OF_MONTH, cal.get(Calendar.DAY_OF_MONTH)-8);          
+          for (int i=0; i<7; i++) {
+              cal.set(Calendar.DAY_OF_MONTH, (cal.get(Calendar.DAY_OF_MONTH)+1) );
+              Date date = cal.getTime();
+              int time = db.getTotalTimeDate(date);
+              Double hours = new Double(time / 60.0);
+              String itemLine[] = new String[2];
+              itemLine[0] = new SimpleDateFormat("yyyy-MM-dd").format(date);
+              itemLine[1] = String.format("%.2f", hours);
+              data.add(itemLine);
+          }
+          model = new TimesLast7DaysTableModel(data);          
+      } catch (Exception ex) {
+          JOptionPane.showMessageDialog(null, "An error has occured:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+      }
+      return model;
+  }
+  
   private TodayTasksTableModel fillTodayTasks() {
       TodayTasksTableModel model = new TodayTasksTableModel();
+      this.todayTaskIds = new ArrayList<Integer>();
       try {
           Date now = new Date();
           List<TaskLog> res = db.getTaskLogs(now, now);
           List<String[]> data = new ArrayList<String[]>();
-          for (Iterator it=res.iterator(); it.hasNext(); ) {
+          int idx=0;
+          for (Iterator it=res.iterator(); it.hasNext(); idx++) {
               TaskLog item = (TaskLog) it.next();
               String[] itemLine = new String[4];
               itemLine[0] = item.getTask();
@@ -56,6 +86,7 @@ public class PanelMainDashboard extends javax.swing.JPanel {
               itemLine[2] = item.getHoursTime();
               itemLine[3] = item.getNotes();                           
               data.add(itemLine);
+              this.todayTaskIds.add(idx, item.getId());              
           }
           model = new TodayTasksTableModel(data);          
       } catch (Exception ex) {
@@ -63,6 +94,8 @@ public class PanelMainDashboard extends javax.swing.JPanel {
       }
       return model;
   }
+  
+  
 
   /**
    * This method is called from within the constructor to initialize the form.
@@ -107,20 +140,15 @@ public class PanelMainDashboard extends javax.swing.JPanel {
         jLabel6.setText("hours");
 
         jButton1.setText("Edit selected task");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel7.setText("Times last 7 days");
 
-        jTableTimesLast7Days.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
-            },
-            new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
-            }
-        ));
+        jTableTimesLast7Days.setModel(fillLast7Days());
         jScrollPane2.setViewportView(jTableTimesLast7Days);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -172,14 +200,27 @@ public class PanelMainDashboard extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel5)
                     .addComponent(jButton1)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 347, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel7)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(160, 160, 160))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        /*
+        String msg = "Selected Today Tasks Table index: " + this.jTableTodayTasks.getSelectedRow() + "\n" + "Selected Last 7 Days Table index: " + this.jTableTimesLast7Days.getSelectedRow();;
+        JOptionPane.showMessageDialog(null, msg, "DBG", JOptionPane.INFORMATION_MESSAGE);
+        */
+        int idx = this.jTableTodayTasks.getSelectedRow();
+        if (idx>=0) {
+            Integer taskId = this.todayTaskIds.get(idx);
+            this.mainFrame.showTaskLog(taskId.intValue());
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -196,6 +237,71 @@ public class PanelMainDashboard extends javax.swing.JPanel {
     private javax.swing.JTable jTableTimesLast7Days;
     private javax.swing.JTable jTableTodayTasks;
     // End of variables declaration//GEN-END:variables
+}
+
+class TimesLast7DaysTableModel extends AbstractTableModel {    
+    private List<String[]> list;
+    private String[] colTitles = new String[] { "Date", "Time" };
+    
+    public TimesLast7DaysTableModel(List<String[]> dayLogs) {
+        this.list = dayLogs;
+    }
+    
+    public TimesLast7DaysTableModel() {
+        this.list = new ArrayList<String[]>();
+    }
+    
+    public int getRowCount() {
+        return list.size();
+    }
+  
+    public int getColumnCount() {
+        return colTitles.length;
+    }
+    
+    @Override
+    public String getColumnName(int columnIndex){
+      return colTitles[columnIndex];
+    }    
+    
+    @Override  
+    public Class<?> getColumnClass(int columnIndex) {  
+        return String.class;  
+    }
+    
+    @Override
+    public Object getValueAt(int rowIndex, int columnIndex) {
+      String[] value = this.list.get(rowIndex);
+      return value[columnIndex];
+    }
+    
+    public void setValueAt(String[] aValue, int rowIndex) {  
+        String[] value = this.list.get(rowIndex);
+        
+        try {            
+            value[0] = aValue[0];
+            value[1] = aValue[1];
+            
+            this.list.set(rowIndex, value);
+            fireTableCellUpdated(rowIndex, 0);  
+            fireTableCellUpdated(rowIndex, 1);  
+        }
+        catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "An error has occured:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }   
+    }
+    
+    @Override  
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {  
+        String[] value = this.list.get(rowIndex);
+        value[columnIndex] = (String) aValue;
+        this.list.set(rowIndex, value);
+        fireTableCellUpdated(rowIndex, columnIndex);  
+    }     
+    
+    public boolean isEditable(int rowIndex, int columnIndex) {
+        return false;
+    }
 }
 
 class TodayTasksTableModel extends AbstractTableModel {    

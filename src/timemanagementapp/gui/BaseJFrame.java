@@ -21,7 +21,7 @@ public class BaseJFrame extends javax.swing.JFrame {
     
     private void showMainDashboard() {
       this.mainPanel.removeAll();
-      PanelMainDashboard p = new PanelMainDashboard();
+      PanelMainDashboard p = new PanelMainDashboard(this);
       this.mainPanel.add(p);
       this.revalidate();
     }         
@@ -35,6 +35,13 @@ public class BaseJFrame extends javax.swing.JFrame {
         this.mainPanel.removeAll();        
         this.repaint();
         this.revalidate();    
+    }
+    
+    public void showTaskLog(int taskId) {
+        this.cleanMainPanel();    
+        PanelTaskLogEdit p = new PanelTaskLogEdit(this, taskId);
+        this.mainPanel.add(p);
+        this.revalidate();   
     }
 
     /**
