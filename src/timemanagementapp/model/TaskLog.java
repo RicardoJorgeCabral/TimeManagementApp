@@ -90,8 +90,10 @@ public class TaskLog {
 
     public String getHoursTime() {
         int minutes = this.time;
-        double hours = new Double(minutes) / 60.0;
-        return new DecimalFormat("#0.00").format(hours);
+        int hours = minutes / 60;
+        int rem_minutes = minutes - ( hours * 60 );
+        String res = String.format("%d", hours) + ":" + String.format("%02d", rem_minutes);
+        return res;
     }
     
     public void setTime(int time) {
