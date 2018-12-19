@@ -5,6 +5,8 @@
  */
 package timemanagementapp.gui;
 
+import java.awt.Toolkit;
+
 /**
  *
  * @author Ricardoc
@@ -15,7 +17,8 @@ public class BaseJFrame extends javax.swing.JFrame {
      * Creates new form BaseJFrame
      */
     public BaseJFrame() {
-        initComponents();
+        initComponents();   
+        this.setIcon();
         showMainDashboard();
     }
     
@@ -43,6 +46,10 @@ public class BaseJFrame extends javax.swing.JFrame {
         this.mainPanel.add(p);
         this.revalidate();   
     }
+    
+    private void setIcon() {
+        this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("images/icon-calendar.png")));
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -64,6 +71,7 @@ public class BaseJFrame extends javax.swing.JFrame {
         jMenuItem3 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Time Management App");
 
         jScrollPane1.setViewportView(mainPanel);
 
