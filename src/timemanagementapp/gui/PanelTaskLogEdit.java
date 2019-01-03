@@ -193,8 +193,6 @@ public class PanelTaskLogEdit extends javax.swing.JPanel {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
 
-        jPanel2.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-
         jLabel1.setText("ID:");
 
         jComboBox1.addActionListener(new java.awt.event.ActionListener() {
@@ -299,7 +297,7 @@ public class PanelTaskLogEdit extends javax.swing.JPanel {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jLabel6)
-                        .addGap(0, 439, Short.MAX_VALUE))
+                        .addGap(0, 443, Short.MAX_VALUE))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(jScrollPane1)
                         .addContainerGap())))
