@@ -15,6 +15,7 @@ import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableColumnModel;
 import org.apache.commons.io.FileUtils;
 import timemanagementapp.util.DBLogs;
 
@@ -29,7 +30,14 @@ public class PanelDBBackup extends javax.swing.JPanel {
      * Creates new form PanelDBBackup
      */
     public PanelDBBackup() {
-        initComponents();        
+        initComponents();  
+        this.setListBackupsTableColumns();
+    }
+    
+    private void setListBackupsTableColumns() {
+        TableColumnModel colModel = tableListBackups.getColumnModel();
+        colModel.getColumn(1).setPreferredWidth(200);    
+        colModel.getColumn(1).setMaxWidth(200);
     }
     
     private ListBackupsTableModel getLogs() {
