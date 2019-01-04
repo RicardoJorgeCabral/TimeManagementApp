@@ -19,8 +19,9 @@ public class PanelConfigurations extends javax.swing.JPanel {
     public PanelConfigurations(BaseJFrame f) {
         initComponents();
         this.mainFrame = f;
-        PanelTaskTypeEdit pan1 = new PanelTaskTypeEdit();
-        tabPanel.addTab("Task Types", pan1);
+        tabPanel.addTab("Task Types", new PanelTaskTypeEdit());
+        tabPanel.addTab("Backups", new PanelDBBackup());
+        
         
     }
 
